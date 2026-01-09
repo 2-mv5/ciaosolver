@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # --- 設定 ---
-st.set_page_config(page_title="チャオチャオ GTO計算機", layout="centered")
+st.set_page_config(page_title="チャオチャオ HU", layout="centered")
 
 def calculate_gto(s_pos, r_pos):
     TRUE_AMT = 1.0
@@ -69,21 +69,22 @@ def calculate_gto(s_pos, r_pos):
     return results, total_sender_ev
 
 # --- UI構築 ---
-st.title("🎲 チャオチャオ GTO戦略計算機")
-st.caption("相手の進行ボーナス・相対リスク考慮済み完全版")
+st.title("🎲 チャオチャオ HU")
+st.caption("")
 
 col1, col2 = st.columns(2)
 with col1:
-    s_pos = st.number_input("自分の位置 (失うマス数)", min_value=0, value=0, step=1)
+    s_pos = st.number_input("自分のマス数", min_value=0, value=0, step=1)
 with col2:
-    r_pos = st.number_input("相手の位置 (失うマス数)", min_value=0, value=0, step=1)
+    r_pos = st.number_input("相手のマス数", min_value=0, value=0, step=1)
 
 if st.button("計算する", type="primary"):
     data, total_ev = calculate_gto(s_pos, r_pos)
     
-    # テーブル表示
+ # テーブル表示 (行番号を隠す)
     df = pd.DataFrame(data)
-    st.table(df)
+    # st.tableの代わりにdataframeを使い、hide_index=Trueにする
+    st.dataframe(df, hide_index=True, use_container_width=True)
     
     # 結果表示
     st.success(f"あなたの総合期待値: **{total_ev:+.2f} 歩/ターン**")
