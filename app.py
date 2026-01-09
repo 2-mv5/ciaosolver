@@ -28,8 +28,11 @@ def calculate_gto(s_pos, r_pos):
             for m in NUMS: lie_alloc[m] = LIE_AMT / 4
 
     # 2. データ生成
+
+　　# 2. データ生成
     results = []
     total_sender_ev = 0.0
+    total_doubt_prob = 0.0  # ★追加: 集計用変数
 
     for m in NUMS:
         total_tokens = TRUE_AMT + lie_alloc[m]
@@ -54,7 +57,11 @@ def calculate_gto(s_pos, r_pos):
         total_sender_ev += term_ev
         display_ev = (true_ev * (TRUE_AMT/total_tokens)) + (lie_outcome * (lie_alloc[m]/total_tokens))
         
-        # 相手EVの表示調整
+        # ★追加: 全体被ダウト率の計算
+        # その数字を宣言する確率 = 正直(1/6) + 嘘(2/6 * 配分率)
+        prob_declaring_m = (1/6) + ((2/6) * (lie_alloc[m] / LIE_AMT))
+        total_doubt_prob += prob_declaring_m * (doubt / 100.0)
+        
         r_ev_val = receiver_ev if abs(receiver_ev) > 0.005 else 0.00
 
         results.append({
@@ -65,9 +72,7 @@ def calculate_gto(s_pos, r_pos):
             "ダウト宣言率": f"{doubt:.1f}%",
             "相手EV": f"{r_ev_val:+.2f}歩" if r_ev_val != 0 else "0.00歩"
         })
-
-    return results, total_sender_ev
-
+    return results, total_sender_ev, (total_doubt_prob * 100.0)
 # --- UI構築 ---
 st.title("🎲 チャオチャオ HU")
 st.caption("")
@@ -79,7 +84,13 @@ with col2:
     r_pos = st.number_input("相手のマス数", min_value=0, value=0, step=1)
 
 if st.button("計算する", type="primary"):
-    data, total_ev = calculate_gto(s_pos, r_pos)
+    # ★変更: 3つの値を受け取る
+    data, total_ev, total_doubt = calculate_gto(s_pos, r_pos)
+    
+    # ★追加: 重要な数字を並べて表示 (Metric)
+    m1, m2 = st.columns(2)
+    m1.metric("総合期待値", f"{total_ev:+.2f} 歩/ターン")
+    m2.metric("被ダウト率 (全体)", f"{total_doubt:.1f} %")
     
  # テーブル表示 (行番号を隠す)
     df = pd.DataFrame(data)
