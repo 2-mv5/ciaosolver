@@ -87,4 +87,13 @@ if st.button("計算する", type="primary"):
     data, total_ev, total_doubt = calculate_gto(s_pos, r_pos)
     
     # 重要な数字を並べて表示 (Metric)
-    m1
+    m1, m2 = st.columns(2)
+    m1.metric("総合期待値", f"{total_ev:+.2f} 歩/ターン")
+    m2.metric("被ダウト率 (全体)", f"{total_doubt:.1f} %")
+    
+    # テーブル表示 (行番号を隠す)
+    df = pd.DataFrame(data)
+    st.dataframe(df, hide_index=True, use_container_width=True)
+    
+    # 結果表示 (下部)
+    st.success(f"あなたの総合期待値: **{total_ev:+.2f} 歩/ターン**")
